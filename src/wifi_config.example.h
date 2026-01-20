@@ -1,4 +1,4 @@
-// wifi_config.h
+// rename it to wifi_config.h
 #pragma once
 
 const char* WIFI_SSID     = "YourNetworkName";
