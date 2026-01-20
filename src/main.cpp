@@ -5,6 +5,7 @@
 // #include <MD_MAX72XX.h>
 // #include <SPI.h>
 #include "WifiController.h"
+#include "InternetServices.cpp"
 
 WifiController* wifi;
 
@@ -147,6 +148,8 @@ WifiController* wifi;
 
 
 #define LED 2
+InternetServices net;
+
 void setup() {
   Serial.begin(115200);
   pinMode(LED,OUTPUT);
@@ -156,6 +159,16 @@ void setup() {
   if (wifi->connect()) {
       Serial.println("WiFi connected!");
       Serial.println(WiFi.localIP());
+
+  char timeStr[16];
+  struct tm now = net.getTime();
+
+  // sprintf(timeStr, "%02d:%02d:%02d", now.tm_hour, now.tm_min, now.tm_sec);
+  sprintf(timeStr, "%02d:%02d", now.tm_hour, now.tm_min);
+  // sprintf(timeStr, "aaa");
+  Serial.println(timeStr);
+
+      
   } else {
       Serial.println("WiFi connection failed");
   }
