@@ -6,6 +6,7 @@
 // #include <SPI.h>
 #include "WifiController.h"
 #include "InternetServices.cpp"
+#include "Clock.cpp"
 
 WifiController* wifi;
 
@@ -149,26 +150,21 @@ WifiController* wifi;
 
 #define LED 2
 InternetServices net;
+Clock clockObj;
 
 void setup() {
   Serial.begin(115200);
   pinMode(LED,OUTPUT);
   Serial.println("WiFi connecting...");
-      wifi = new WifiController();   // safe
+  wifi = new WifiController();
 
   if (wifi->connect()) {
       Serial.println("WiFi connected!");
       Serial.println(WiFi.localIP());
 
-  char timeStr[16];
-  struct tm now = net.getTime();
+      clockObj.setTime(net.getTime());
+      Serial.println(clockObj.toString());
 
-  // sprintf(timeStr, "%02d:%02d:%02d", now.tm_hour, now.tm_min, now.tm_sec);
-  sprintf(timeStr, "%02d:%02d", now.tm_hour, now.tm_min);
-  // sprintf(timeStr, "aaa");
-  Serial.println(timeStr);
-
-      
   } else {
       Serial.println("WiFi connection failed");
   }
@@ -176,9 +172,9 @@ void setup() {
 
 void loop() {
   delay(500);
-// you can set the delay time by adjusting the parameter of delay();
   digitalWrite(LED,HIGH);
   delay(500);
   digitalWrite(LED,LOW);
   Serial.println("aaa");
+  Serial.println(clockObj.toString());
 }
