@@ -5,11 +5,12 @@ WifiController::WifiController() {
 }
 
 bool WifiController::connect() {
+    Serial.print("Connecting to WiFi...");  
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     int retries = 0;
     const int maxRetries = 20;
-    Serial.print("Connecting to WiFi...");  
+    
     while (WiFi.status() != WL_CONNECTED && retries < maxRetries) {
         delay(500);
         retries++;
