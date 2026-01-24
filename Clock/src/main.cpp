@@ -4,9 +4,9 @@
 // #include <MD_Parola.h>
 // #include <MD_MAX72XX.h>
 // #include <SPI.h>
-#include "WifiController.h"
-#include "InternetServices.cpp"
-#include "Clock.cpp"
+#include "wifi/WifiController.h"
+#include "internet/InternetServices.cpp"
+#include "clock/Clock.cpp"
 
 WifiController* wifi;
 
