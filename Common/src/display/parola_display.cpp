@@ -3,6 +3,9 @@
 
 class ParolaDisplay {
     #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
+    // MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
+    // MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+
 public:
     ParolaDisplay(
         // md_parola_hw_type_t hardwareType,
