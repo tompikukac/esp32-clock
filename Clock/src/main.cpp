@@ -1,9 +1,5 @@
 #include <Arduino.h>
-// #include <time.h>
 
-// #include <MD_Parola.h>
-// #include <MD_MAX72XX.h>
-// #include <SPI.h>
 #include "wifi/wifi_controller.h"
 #include "internet/internet_services.cpp"
 #include "clock/clock.cpp"
