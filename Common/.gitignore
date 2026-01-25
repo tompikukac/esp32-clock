@@ -1,2 +1,2 @@
 .pio
-src/wifi_config.cpp
+src/wifi/wifi_config.cpp
