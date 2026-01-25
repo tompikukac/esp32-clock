@@ -8,17 +8,21 @@
 #include "internet/internet_services.cpp"
 #include "clock/clock.cpp"
 #include "deepsleep.cpp"
+#include "display/parola_display.cpp"
 
 WifiController* wifi;
 DeepSleep deepSleep;
 
 // #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-// #define MAX_DEVICES 4
-// #define DATA_PIN  23   // DIN
-// #define CLK_PIN   18   // CLK
-// #define CS_PIN    5    // CS
+#define MAX_DEVICES 4
+#define DATA_PIN  23   // DIN
+#define CLK_PIN   18   // CLK
+#define CS_PIN    5    // CS
+ParolaDisplay myDisplay(DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+
 
 // MD_Parola display = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+
 // // MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
 // // MD_MAX72XX mx = MD_MAX72XX(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 
@@ -101,8 +105,8 @@ DeepSleep deepSleep;
 //   Serial.println(timeStr);
 
 //   Serial.println("LED...");
-//   display.begin();
-//   display.displayClear();
+  // display.begin();
+  // display.displayClear();
 //   // display.displayText("Hello", PA_CENTER, 50, 2000, PA_SCROLL_LEFT, PA_SCROLL_LEFT);
 //   // display.displayText(timeStr, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
  
@@ -167,6 +171,12 @@ void setup() {
       clockObj.setTime(net.getTime());
       Serial.println(clockObj.toStringHMS());
 
+  // display.begin();
+  // display.displayClear();
+    myDisplay.begin();
+    myDisplay.setBrightness(1);
+
+
   } else {
       Serial.println("WiFi connection failed");
   }
@@ -175,10 +185,19 @@ void setup() {
 void loop() {
   delay(500);
   digitalWrite(LED,HIGH);
+  // myDisplay.setText(clockObj.toStringHM(' ').c_str());
+  // myDisplay.update();
   delay(500);
   digitalWrite(LED,LOW);
-  Serial.println("aaa");
   Serial.println(clockObj.toStringHMS());
   Serial.println(clockObj.toStringHM());
-  deepSleep.sleep(0,20);
+
+  myDisplay.setText(clockObj.toStringHM().c_str());
+  myDisplay.update();
+  // display.displayText(clockObj.toStringHM().c_str(), PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+  // display.displayText("aaa", PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+
+  // display.displayAnimate();
+
+  // deepSleep.sleep(0,20);
 }

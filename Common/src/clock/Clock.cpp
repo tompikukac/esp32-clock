@@ -24,10 +24,10 @@ public:
         return String(buf);
     }
 
-    String toStringHM() const {
+    String toStringHM(char sep = ':') const {
         struct tm now = getTime();
         char buf[6];
-        sprintf(buf, "%02d:%02d", now.tm_hour, now.tm_min);
+        sprintf(buf, "%02d%c%02d", now.tm_hour, sep, now.tm_min);
         return String(buf);
     }
 
