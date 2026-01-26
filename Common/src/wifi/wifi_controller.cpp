@@ -33,5 +33,8 @@ bool WifiController::isConnected() const {
 }
 
 String WifiController::getDeviceId() {
-    return WiFi.macAddress();
+    String mac = WiFi.macAddress();
+    mac.toUpperCase();
+    mac.replace(":", "");
+    return mac;
 }

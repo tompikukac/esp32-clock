@@ -2,10 +2,15 @@
 
 #include "wifi/wifi_controller.h"
 #include "deepsleep.cpp"
+#include "config.cpp"
+#include "internet/internet_services.cpp"
 
 #define LED 2
+#define CONFIG_ROOT "https://raw.githubusercontent.com/tompikukac/esp32-projects/main/config/devices/"
 
 WifiController* wifi;
+InternetServices net;
+Config config;
 DeepSleep deepSleep;
 
 void setup() {
@@ -20,6 +25,13 @@ void setup() {
     Serial.println("WiFi connected!");
     Serial.println(WiFi.localIP());
     Serial.println(wifi->getDeviceId());
+
+    // Load configuration
+    String defaultJson = net.getConfig(String(CONFIG_ROOT) + "default.json");
+    config.parse(defaultJson);
+    String configJson = net.getConfig(CONFIG_ROOT + wifi->getDeviceId() + ".json");
+    config.parse(configJson);
+    Serial.println("Device name: " + config.name);
 
   } else {
       Serial.println("WiFi connection failed");

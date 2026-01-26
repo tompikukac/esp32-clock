@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <time.h>
+#include <HTTPClient.h>
 
 class InternetServices {
 public:
@@ -32,5 +33,21 @@ public:
 
         Serial.println(&timeinfo, "Time: %Y-%m-%d %H:%M:%S");
         return timeinfo;
+    }
+
+    String getConfig(const String& url) {
+        HTTPClient http;
+        http.begin(url);
+        int httpCode = http.GET();
+        String payload;
+
+        if (httpCode == HTTP_CODE_OK) {
+            payload = http.getString();
+        } else {
+            payload = "";  // vagy hibakezelés
+        }
+
+        http.end();
+        return payload;
     }
 };
