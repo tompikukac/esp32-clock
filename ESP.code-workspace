@@ -5,6 +5,10 @@
 		},
 		{
 			"path": "Clock"
+		},
+		{
+			"name": "Temperature",
+			"path": "Temperature"
 		}
 	],
 	"settings": {}

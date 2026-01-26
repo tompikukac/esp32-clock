@@ -31,3 +31,7 @@ void WifiController::disconnect() {
 bool WifiController::isConnected() const {
     return WiFi.status() == WL_CONNECTED;
 }
+
+String WifiController::getDeviceId() {
+    return WiFi.macAddress();
+}

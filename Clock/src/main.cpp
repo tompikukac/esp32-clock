@@ -44,11 +44,11 @@ void setup() {
 }
 
 void loop() {
-  delay(500);
+  delay(1500);
   digitalWrite(LED,HIGH);
   // myDisplay.setText(clockObj.toStringHM(' ').c_str());
   // myDisplay.update();
-  delay(500);
+  delay(1500);
   digitalWrite(LED,LOW);
   Serial.println(clockObj.toStringHMS());
   Serial.println(clockObj.toStringHM());

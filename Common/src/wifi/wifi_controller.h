@@ -8,4 +8,5 @@ public:
     bool connect();
     void disconnect();
     bool isConnected() const;
+    String getDeviceId();
 };
