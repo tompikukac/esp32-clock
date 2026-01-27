@@ -3,9 +3,9 @@
 class Config {
 public:
     String name;
-    unsigned long deepSleepTimeInSec = 600; 
+    unsigned long deepSleepTimeInSec = 599; 
 
-    Config() : name("default-device") {}  // default érték
+    Config() : name("default-device") {}
 
     bool parse(const String& jsonStr) {
         StaticJsonDocument<200> doc;
@@ -17,10 +17,14 @@ public:
         if (doc.containsKey("name")) {
             name = String(doc["name"].as<const char*>());
         }
-        
-        if (doc.containsKey("deepSleepTime")) {
-            deepSleepTimeInSec = doc["deepSleepTime"].as<unsigned long>();
+
+        if (doc.containsKey("deepSleepTimeInSec")) {
+            deepSleepTimeInSec = doc["deepSleepTimeInSec"].as<unsigned long>();
         }
         return true;
+    }
+
+    String toString() const {
+        return "name: " + name + ", deepSleepTimeInSec: " + String(deepSleepTimeInSec);
     }
 };

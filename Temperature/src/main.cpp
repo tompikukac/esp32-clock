@@ -27,11 +27,14 @@ void setup() {
     Serial.println(wifi->getDeviceId());
 
     // Load configuration
+    Serial.println("Reading default configuration...");
     String defaultJson = net.getConfig(String(CONFIG_ROOT) + "default.json");
     config.parse(defaultJson);
+    Serial.println("Reading specific configuration...");
     String configJson = net.getConfig(CONFIG_ROOT + wifi->getDeviceId() + ".json");
+    Serial.println("Config JSON: " + configJson);
     config.parse(configJson);
-    Serial.println("Device name: " + config.name);
+    Serial.println(config.toString());
 
   } else {
       Serial.println("WiFi connection failed");

@@ -44,7 +44,7 @@ public:
         if (httpCode == HTTP_CODE_OK) {
             payload = http.getString();
         } else {
-            payload = "";  // vagy hibakezelés
+            payload = "";
         }
 
         http.end();
