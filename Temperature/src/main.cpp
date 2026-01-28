@@ -6,6 +6,7 @@
 #include "config.cpp"
 #include "internet/internet_services.cpp"
 #include "config_storage.cpp"
+#include "BME280Sensor.cpp"
 
 #define CONFIG_ROOT "https://raw.githubusercontent.com/tompikukac/esp32-projects/main/config/devices/"
 
@@ -16,6 +17,7 @@ InternetServices net;
 Config config;
 DeepSleep deepSleep;
 ConfigStorage storage;
+BME280Sensor sensor(4, 5);
 
 void setup() {
   Serial.begin(115200);
@@ -35,7 +37,6 @@ delay(2000);
     Serial.println(wifi->getDeviceId());
 
     storage.begin();
-
     if (!storage.loadConfig(config)) {
       // Load configuration
       Serial.println("Reading default configuration...");
@@ -57,6 +58,13 @@ delay(2000);
 
     storage.end();
 
+    if (!sensor.begin()) {
+      Serial.println("BME280 init failed!");
+      statusLed.setColor(Colors::Red);  
+      deepSleep.sleepInSec(10);
+    }
+    Serial.println("BME280 ready");
+    
     Serial.println(config.toString());
 
   } else {
@@ -75,6 +83,11 @@ void loop() {
   delay(1500);
   Serial.println("...LOOP");
 
+  BME280Data data = sensor.read();
+  Serial.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n",
+                data.temperature, data.humidity, data.pressure);
+
+
   delay(15000);
 
 
@@ -83,7 +96,6 @@ void loop() {
   statusLed.setColor(Colors::Green);
   delay(500); 
   statusLed.off();
-  deepSleep.sleepInSec(10);
+  // deepSleep.sleepInSec(10);
   // deepSleep.sleepInSec(config.deepSleepTimeInSec);
 }
-
