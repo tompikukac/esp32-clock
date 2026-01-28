@@ -24,7 +24,7 @@ void setup() {
   
   statusLed.begin();
   statusLed.setBrightness(4);
-  statusLed.setColor(Colors::Red);  
+  statusLed.setColor(Colors::Blue);  
 delay(2000);
   Serial.println("WiFi connecting...");
   wifi = new WifiController();
@@ -61,7 +61,8 @@ delay(2000);
 
   } else {
       Serial.println("WiFi connection failed");
-      deepSleep.sleep(0,5);
+      statusLed.setColor(Colors::Red);  
+      deepSleep.sleepInSec(10);
   }
   statusLed.setColor(Colors::Lime);  
 }
@@ -75,6 +76,12 @@ void loop() {
   Serial.println("...LOOP");
 
   delay(15000);
+
+
+  statusLed.setColor(Colors::Blue);
+  delay(500); 
+  statusLed.setColor(Colors::Green);
+  delay(500); 
   statusLed.off();
   deepSleep.sleepInSec(10);
   // deepSleep.sleepInSec(config.deepSleepTimeInSec);
