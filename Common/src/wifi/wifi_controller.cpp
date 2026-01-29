@@ -5,27 +5,40 @@ WifiController::WifiController() {
 }
 
 bool WifiController::connect() {
-    Serial.print("Connecting to WiFi...");  
+    Serial.println("WiFi: starting connection");
+
+    // Hard reset WiFi state
+    WiFi.disconnect(true);
+    delay(100);
+    WiFi.mode(WIFI_OFF);
+    delay(100);
+
+    WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);        // VERY important for stability
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-    int retries = 0;
-    const int maxRetries = 20;
-    
-    while (WiFi.status() != WL_CONNECTED && retries < maxRetries) {
-        delay(500);
-        retries++;
+    const uint32_t timeoutMs = 15000;
+    uint32_t start = millis();
+
+    while (WiFi.status() != WL_CONNECTED) {
+        if (millis() - start > timeoutMs) {
+            Serial.println("WiFi: connection timeout");
+            return false;
+        }
+        delay(250);
+        yield(); // lets WiFi stack breathe
     }
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.print("Connected. IP: ");
-        Serial.println(WiFi.localIP());
-    } else {
-        Serial.println("Not connected.");
-    }
-    return WiFi.status() == WL_CONNECTED;
+
+    Serial.print("WiFi connected, IP: ");
+    Serial.println(WiFi.localIP());
+    return true;
 }
 
 void WifiController::disconnect() {
-    WiFi.disconnect(true);   // drop connection + erase old settings
+    WiFi.disconnect(true);
+    delay(100);
+    WiFi.mode(WIFI_OFF);   // <-- this is the key
+    delay(100);
 }
 
 bool WifiController::isConnected() const {
