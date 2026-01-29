@@ -8,7 +8,7 @@ public:
   InfluxController(const char* host, const char* org, const char* bucket, const char* token)
     : _host(host), _org(org), _bucket(bucket), _token(token) {}
 
-  void send(const BME280Data& data) {
+  void send(const BME280Data& data, const String& name) {
     if (WiFi.status() != WL_CONNECTED) {
       Serial.println("WiFi not connected");
       return;
@@ -20,7 +20,7 @@ public:
     http.addHeader("Authorization", String("Token ") + _token);
     http.addHeader("Content-Type", "text/plain");
 
-    String payload = buildPayload(data);
+    String payload = buildPayload(data, name);
 
     int code = http.POST(payload);
     if (code > 0) {
@@ -37,9 +37,10 @@ private:
   const char* _bucket;
   const char* _token;
 
-  String buildPayload(const BME280Data& data) {
-    return "environment,name=esp32 temperature=" + String(data.temperature, 2) +
-           ",humidity=" + String(data.humidity, 2) +
-           ",pressure=" + String(data.pressure, 2);
+  String buildPayload(const BME280Data& data, const String& name) {
+    return "environment,name=" + name +
+          " temperature=" + String(data.temperature, 2) +
+          ",humidity=" + String(data.humidity, 2) +
+          ",pressure=" + String(data.pressure, 2);
   }
 };
