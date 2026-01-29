@@ -12,7 +12,7 @@
 
 #define CONFIG_ROOT "https://raw.githubusercontent.com/tompikukac/esp32-projects/main/config/devices/"
 
-InfluxController influx("http://192.168.1.111:8086", "szlab", "esp32", "your-influxdb-token");
+InfluxController influx("http://192.168.1.111:8086", "szlab", "esp32", influxToken);
 
 Esp32C3ZeroLed statusLed(10);
 
@@ -24,14 +24,18 @@ ConfigStorage storage;
 BME280Sensor sensor(4, 5);
 
 void setup() {
-  Serial.begin(115200);
-  delay(2000);
-  Serial.println("TEMPERATURE");
-  
   statusLed.begin();
   statusLed.setBrightness(4);
   statusLed.setColor(Colors::Blue);  
-delay(2000);
+
+  Serial.begin(115200);
+  delay(2000);
+  Serial.println("TEMPERATURE");
+  esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+  Serial.printf("Wakeup cause: %d\n", cause);
+  
+
+  delay(2000);
   Serial.println("WiFi connecting...");
   wifi = new WifiController();
 
@@ -64,7 +68,9 @@ delay(2000);
 
     if (!sensor.begin()) {
       Serial.println("BME280 init failed!");
-      statusLed.setColor(Colors::Red);  
+      statusLed.setColor(Colors::Yellow);  
+      //esp_restart();
+      wifi->disconnect();
       deepSleep.sleepInSec(10);
     }
     Serial.println("BME280 ready");
@@ -74,37 +80,12 @@ delay(2000);
   } else {
       Serial.println("WiFi connection failed");
       statusLed.setColor(Colors::Red);  
+      //esp_restart();
+      wifi->disconnect();
       deepSleep.sleepInSec(10);
   }
   statusLed.setColor(Colors::Lime);  
 }
-
-// void sendToInflux(const BME280Data& data) {
-//   if (WiFi.status() != WL_CONNECTED) {
-//     Serial.println("WiFi not connected");
-//     return;
-//   }
-
-//   HTTPClient http;
-//   String url = String(influxHost) + "/api/v2/write?org=" + influxOrg + "&bucket=" + influxBucket + "&precision=s";
-//   http.begin(url);
-//   http.addHeader("Authorization", String("Token ") + influxToken);
-//   http.addHeader("Content-Type", "text/plain");
-
-//   String body = "environment,name=esp32 temperature=" + String(data.temperature, 2) +
-//                 ",humidity=" + String(data.humidity, 2) +
-//                 ",pressure=" + String(data.pressure, 2);
-
-//   int httpResponseCode = http.POST(body);
-
-//   if (httpResponseCode > 0) {
-//     Serial.printf("InfluxDB response code: %d\n", httpResponseCode);
-//   } else {
-//     Serial.printf("Error sending to InfluxDB: %s\n", http.errorToString(httpResponseCode).c_str());
-//   }
-
-//   http.end();
-// }
 
 void loop() {
   Serial.println("LOOP...");
@@ -121,7 +102,7 @@ void loop() {
   influx.send(data);
 
 
-  delay(15000);
+  delay(60000);
 
 
   statusLed.setColor(Colors::Blue);
@@ -129,6 +110,9 @@ void loop() {
   statusLed.setColor(Colors::Green);
   delay(500); 
   statusLed.off();
-  // deepSleep.sleepInSec(10);
+  delay(100); 
+  wifi->disconnect();
+  deepSleep.sleepInSec(10);
   // deepSleep.sleepInSec(config.deepSleepTimeInSec);
+  // deepSleep.lightSleepInSec(config.deepSleepTimeInSec);
 }
