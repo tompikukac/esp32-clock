@@ -4,10 +4,10 @@
 ConfigController::ConfigController(const String& deviceId, const String& configRoot)
     : deviceId(deviceId), configRoot(configRoot) {}
 
-ConfigData& ConfigController::load() {
+ConfigData& ConfigController::load(bool forceLoad) {
     static ConfigData config;
     storage.begin();
-    if (!storage.loadConfig(config)) {
+    if (!storage.loadConfig(config) || forceLoad) {
         Serial.println("Reading default configuration...");
         String defaultJson = net.getConfig(configRoot + "default.json");
         config.parse(defaultJson);

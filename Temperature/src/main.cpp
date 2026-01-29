@@ -31,6 +31,7 @@ void goToDeepSleep(const LedColor* color, uint32_t sleepSeconds) {
   wifi->disconnect();
   deepSleep.sleepInSec(sleepSeconds);
 }
+#define BOOT_BUTTON_GPIO 0
 
 void setup() {
   statusLed.begin();
@@ -39,18 +40,27 @@ void setup() {
 
   Serial.begin(115200);
   delay(2000);
+
   Serial.println("TEMPERATURE");
   esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
-  Serial.printf("Wakeup cause: %d\n", cause);
+  bool forceLoad = (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED);
+  Serial.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
   
+  if (forceLoad) {
+    Serial.println("safety delay for first time setup");
+    statusLed.setColor(Colors::Magenta);  
+    delay(15000);
+  } else {
+    delay(2000);
+  }
 
-  delay(2000);
   Serial.println("WiFi connecting...");
   wifi = new WifiController();
 
   if (wifi->connect()) {
     ConfigController configCtrl(wifi->getDeviceId(), String(CONFIG_ROOT));
-    config = configCtrl.load();
+    
+    config = configCtrl.load(forceLoad);
 
     if (!sensor.begin()) {
       Serial.println("BME280 init failed!");
@@ -79,19 +89,14 @@ void loop() {
   Serial.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n",
                 data.temperature, data.humidity, data.pressure);
  
-  influx.send(data);
-
-
-  delay(config.deepSleepTimeInSec * 1000);
-
-
   statusLed.setColor(Colors::Blue);
   delay(500); 
+  influx.send(data);
+
   statusLed.setColor(Colors::Green);
   delay(500); 
   statusLed.off();
   delay(100); 
 
-  goToDeepSleep(nullptr, 10);
-  // deepSleep.sleepInSec(config.deepSleepTimeInSec);
+  goToDeepSleep(nullptr, config.deepSleepTimeInSec);
 }
