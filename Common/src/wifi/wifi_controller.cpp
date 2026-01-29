@@ -31,6 +31,7 @@ bool WifiController::connect() {
 
     Serial.print("WiFi connected, IP: ");
     Serial.println(WiFi.localIP());
+    Serial.println("MAC: "+getDeviceId());
     return true;
 }
 

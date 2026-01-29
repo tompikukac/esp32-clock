@@ -5,8 +5,6 @@
 #include "deepsleep.cpp"
 #include "config/config_data.h"
 #include "config/config_controller.h"
-// #include "internet/internet_services.cpp"
-// #include "config_storage.cpp"
 #include "bme280_sensor.h"
 #include "secret.h"
 #include "influxdb_controller.cpp"
@@ -18,11 +16,21 @@ InfluxController influx("http://192.168.1.111:8086", "szlab", "esp32", influxTok
 Esp32C3ZeroLed statusLed(10);
 
 WifiController* wifi;
-// InternetServices net;
 ConfigData config;
 DeepSleep deepSleep;
-// ConfigStorage storage;
 BME280Sensor sensor(4, 5);
+
+void goToDeepSleep(const LedColor* color, uint32_t sleepSeconds) {
+  if (color == nullptr) {
+    statusLed.off();
+  } else {
+    statusLed.setColor(*color);
+  }
+  Serial.flush();
+  delay(100);
+  wifi->disconnect();
+  deepSleep.sleepInSec(sleepSeconds);
+}
 
 void setup() {
   statusLed.begin();
@@ -41,40 +49,12 @@ void setup() {
   wifi = new WifiController();
 
   if (wifi->connect()) {
-    Serial.println("WiFi connected!");
-    Serial.println(WiFi.localIP());
-    Serial.println(wifi->getDeviceId());
-
     ConfigController configCtrl(wifi->getDeviceId(), String(CONFIG_ROOT));
     config = configCtrl.load();
 
-    // storage.begin();
-    // if (!storage.loadConfig(config)) {
-    //   // Load configuration
-    //   Serial.println("Reading default configuration...");
-    //   String defaultJson = net.getConfig(String(CONFIG_ROOT) + "default.json");
-    //   config.parse(defaultJson);
-    //   Serial.println("Reading specific configuration...");
-    //   String configJson = net.getConfig(CONFIG_ROOT + wifi->getDeviceId() + ".json");
-    //   Serial.println("Config JSON: " + configJson);
-    //   config.parse(configJson);
-
-    //   if(config.name != "default-device") {
-    //       Serial.println("Saving configuration...");
-    //       storage.saveConfig(config);
-    //   }
-
-    // } else {
-    //   Serial.println("Configuration loaded from storage.");
-    // }
-    // storage.end();
-
     if (!sensor.begin()) {
       Serial.println("BME280 init failed!");
-      statusLed.setColor(Colors::Yellow);  
-      //esp_restart();
-      wifi->disconnect();
-      deepSleep.sleepInSec(10);
+      goToDeepSleep(&Colors::Yellow, 10);
     }
     Serial.println("BME280 ready");
     
@@ -82,10 +62,7 @@ void setup() {
 
   } else {
       Serial.println("WiFi connection failed");
-      statusLed.setColor(Colors::Red);  
-      //esp_restart();
-      wifi->disconnect();
-      deepSleep.sleepInSec(10);
+      goToDeepSleep(&Colors::Red, 10);
   }
   statusLed.setColor(Colors::Lime);  
 }
@@ -93,10 +70,10 @@ void setup() {
 void loop() {
   Serial.println("LOOP...");
   statusLed.setColor(Colors::Olive);
-  delay(1500); 
+  delay(500); 
   statusLed.setColor(Colors::Green);
-  delay(1500);
-  Serial.println("...LOOP");
+  delay(500);
+ 
 
   BME280Data data = sensor.read();
   Serial.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n",
@@ -105,7 +82,7 @@ void loop() {
   influx.send(data);
 
 
-  delay(60000);
+  delay(config.deepSleepTimeInSec * 1000);
 
 
   statusLed.setColor(Colors::Blue);
@@ -114,8 +91,7 @@ void loop() {
   delay(500); 
   statusLed.off();
   delay(100); 
-  wifi->disconnect();
-  deepSleep.sleepInSec(10);
-  deepSleep.sleepInSec(config.deepSleepTimeInSec);
-  // deepSleep.lightSleepInSec(config.deepSleepTimeInSec);
+
+  goToDeepSleep(nullptr, 10);
+  // deepSleep.sleepInSec(config.deepSleepTimeInSec);
 }
