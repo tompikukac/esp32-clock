@@ -44,8 +44,7 @@ void setup() {
   Serial.println("TEMPERATURE");
   esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
   bool forceLoad = (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED);
-  Serial.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
-  
+
   if (forceLoad) {
     Serial.println("safety delay for first time setup");
     statusLed.setColor(Colors::Magenta);  
@@ -53,6 +52,8 @@ void setup() {
   } else {
     delay(2000);
   }
+
+  Serial.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
 
   Serial.println("WiFi connecting...");
   wifi = new WifiController();
