@@ -86,13 +86,17 @@ void loop() {
   statusLed.setColor(Colors::Green);
   delay(500);
  
-
-  BME280Data data = sensor.read();
-  Serial.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n", data.temperature, data.humidity, data.pressure);
+  BME280Data* data = sensor.read();
+  if (data == nullptr) {
+    statusLed.setColor(Colors::Blue);
+    Serial.println("BME280 read failed");
+    goToDeepSleep(&Colors::Yellow, 10);
+  }
+  Serial.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n", data->temperature, data->humidity, data->pressure);
  
   statusLed.setColor(Colors::Blue);
   delay(500); 
-  influx.send(data, config.name);
+  influx.send(*data, config.name);
 
   statusLed.setColor(Colors::Green);
   delay(500); 

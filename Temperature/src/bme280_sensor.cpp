@@ -8,10 +8,22 @@ bool BME280Sensor::begin() {
   return _bme.begin(_addr);
 }
 
-BME280Data BME280Sensor::read() {
-  BME280Data data;
-  data.temperature = _bme.readTemperature();
-  data.humidity    = _bme.readHumidity();
-  data.pressure    = _bme.readPressure() / 100.0F; // hPa
-  return data;
+BME280Data* BME280Sensor::read() {
+  static BME280Data data;
+
+  for (int i = 0; i < 5; i++) {
+    data.temperature = _bme.readTemperature();
+    data.humidity    = _bme.readHumidity();
+    data.pressure    = _bme.readPressure() / 100.0F; // hPa
+
+    if (data.temperature > -40 && data.temperature < 85 &&
+        data.humidity >= 0 && data.humidity <= 100 &&
+        data.pressure > 300 && data.pressure < 1100) {
+      return &data;
+    }
+
+    delay(5);
+  }
+
+  return nullptr;
 }
