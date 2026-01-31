@@ -2,6 +2,7 @@
 #include <HTTPClient.h>
 #include <Arduino.h>
 #include "bme280_sensor.h"
+#include "logger.h"
 
 class InfluxController {
 public:
@@ -10,7 +11,7 @@ public:
 
   void send(const BME280Data& data, const String& name) {
     if (WiFi.status() != WL_CONNECTED) {
-      Serial.println("WiFi not connected");
+      logger.println("WiFi not connected");
       return;
     }
 
@@ -24,9 +25,9 @@ public:
 
     int code = http.POST(payload);
     if (code > 0) {
-      Serial.printf("InfluxDB response: %d\n", code);
+      logger.printf("InfluxDB response: %d\n", code);
     } else {
-      Serial.printf("InfluxDB POST error: %s\n", http.errorToString(code).c_str());
+      logger.printf("InfluxDB POST error: %s\n", http.errorToString(code).c_str());
     }
     http.end();
   }

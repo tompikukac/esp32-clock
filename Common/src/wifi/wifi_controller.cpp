@@ -1,11 +1,12 @@
 #include "wifi_controller.h"
+#include "logger.h"
 
 WifiController::WifiController() {
     WiFi.mode(WIFI_STA);
 }
 
 bool WifiController::connect() {
-    Serial.println("WiFi: starting connection");
+    logger.println("WiFi: starting connection");
 
     // Hard reset WiFi state
     WiFi.disconnect(true);
@@ -22,16 +23,16 @@ bool WifiController::connect() {
 
     while (WiFi.status() != WL_CONNECTED) {
         if (millis() - start > timeoutMs) {
-            Serial.println("WiFi: connection timeout");
+            logger.println("WiFi: connection timeout");
             return false;
         }
         delay(250);
         yield(); // lets WiFi stack breathe
     }
 
-    Serial.print("WiFi connected, IP: ");
-    Serial.println(WiFi.localIP());
-    Serial.println("MAC: "+getDeviceId());
+    logger.print("WiFi connected, IP: ");
+    logger.println(WiFi.localIP().toString());
+    logger.println("MAC: "+getDeviceId());
     return true;
 }
 

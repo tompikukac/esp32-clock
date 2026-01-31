@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <time.h>
 #include <HTTPClient.h>
+#include "logger.h"
 
 class InternetServices {
 public:
@@ -21,33 +22,42 @@ public:
         const int maxRetries = 20;
 
         while (!getLocalTime(&timeinfo)) {
-            Serial.println("Waiting for time...");
+            logger.println("Waiting for time...");
             delay(500);
             retries++;
 
             if (retries >= maxRetries) {
-                Serial.println("Failed to get time after attempts, exiting.");
+                logger.println("Failed to get time after attempts, exiting.");
                 break;   // or return; depending on your design
             }
         }
 
-        Serial.println(&timeinfo, "Time: %Y-%m-%d %H:%M:%S");
+        logger.println(&timeinfo, "Time: %Y-%m-%d %H:%M:%S");
         return timeinfo;
     }
 
-    String getConfig(const String& url) {
+    String* getConfig(const String& url) {
+    static String payload;
+
+    for (int i = 0; i < 5; i++) {
         HTTPClient http;
         http.begin(url);
-        int httpCode = http.GET();
-        String payload;
 
+        int httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK) {
             payload = http.getString();
+            http.end();
+
+            if (payload.length() > 0) {
+                return &payload;
+            }
         } else {
-            payload = "";
+            http.end();
         }
 
-        http.end();
-        return payload;
+        delay(200);
+    }
+
+    return nullptr;
     }
 };
