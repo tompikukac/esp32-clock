@@ -29,7 +29,7 @@ services:
         influx bucket create -n esp32logs -r 72h -o szlab -t ${INFLUXDB_TOKEN} --host http://influxdb:8086
     restart: "no"
 
-  grafana:
+grafana:
     image: grafana/grafana:10.0.3
     user: "0"
     container_name: grafana
@@ -41,7 +41,15 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: yourgrafanapassword
       INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      
+      # --- Anonymous Access Settings ---
       GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_NAME: "szlab"
       GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
       GF_AUTH_ANONYMOUS_SKIP_LOGIN_PAGE: "true"
+      
+      # --- The Magic Link ---
+      # This points to the JSON file INSIDE the container
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/lakas-dashboard.json
+      
     restart: unless-stopped
