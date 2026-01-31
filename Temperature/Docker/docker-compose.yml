@@ -9,12 +9,32 @@ services:
     volumes:
       - /volume1/docker/influxdb/data:/var/lib/influxdb2
     environment:
-      INFLUXDB_ADMIN_USER: admin
-      INFLUXDB_ADMIN_PASSWORD: yourpassword
-      INFLUXDB_BUCKET: esp32
-      INFLUXDB_ORG: szlab
-      INFLUXDB_HTTP_FLUX_ENABLED: "true"
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: yourpassword
+      DOCKER_INFLUXDB_INIT_ORG: szlab
+      DOCKER_INFLUXDB_INIT_BUCKET: esp32
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
     restart: unless-stopped
+
+  influxdb-init:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      - influxdb
+    environment:
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+    entrypoint: >
+      sh -c "
+      until curl -sf http://influxdb:8086/health; do sleep 2; done;
+
+      curl -s -X POST http://influxdb:8086/api/v2/buckets \
+        -H \"Authorization: Token $${INFLUXDB_TOKEN}\" \
+        -H 'Content-Type: application/json' \
+        --data '{
+          \"org\": \"szlab\",
+          \"name\": \"esp32logs\"
+        }';
+      "
 
   grafana:
     image: grafana/grafana:10.0.3
