@@ -50,7 +50,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: yourgrafanapassword
       INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
-        GF_AUTH_ANONYMOUS_ENABLED: "true"
-        GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
-        GF_AUTH_ANONYMOUS_SKIP_LOGIN_PAGE: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_AUTH_ANONYMOUS_SKIP_LOGIN_PAGE: "true"
     restart: unless-stopped
