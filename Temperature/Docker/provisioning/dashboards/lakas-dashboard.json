@@ -5,7 +5,7 @@
         "builtIn": 1,
         "datasource": {
           "type": "grafana",
-          "uid": "lakas-01"
+          "uid": "-- Grafana --"
         },
         "enable": true,
         "hide": true,
@@ -21,6 +21,8 @@
   "id": 1,
   "links": [],
   "liveNow": false,
+  "title": "Lakas Dashboard",
+  "uid": "lakas-01",
   "panels": [
     {
       "datasource": {
