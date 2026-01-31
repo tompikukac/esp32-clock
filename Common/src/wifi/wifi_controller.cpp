@@ -5,7 +5,7 @@ WifiController::WifiController() {
     WiFi.mode(WIFI_STA);
 }
 
-bool WifiController::connect() {
+bool WifiController::connect(const IPAddress& ip) {
     logger.println("WiFi: starting connection");
 
     // Hard reset WiFi state
@@ -16,6 +16,14 @@ bool WifiController::connect() {
 
     WiFi.mode(WIFI_STA);
     WiFi.setSleep(false);        // VERY important for stability
+
+    if (ip != IPAddress(0,0,0,0)) {
+        IPAddress local_IP = ip; // from parameter
+        IPAddress gateway(192,168,1,1);  // set your gateway
+        IPAddress subnet(255,255,255,0); // set your subnet mask
+
+        WiFi.config(local_IP, gateway, subnet);
+    }
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     const uint32_t timeoutMs = 15000;
