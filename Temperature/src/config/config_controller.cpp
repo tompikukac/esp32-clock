@@ -10,7 +10,7 @@ ConfigData* ConfigController::load() {
     storage.begin();
     config = storage.loadConfig();
 
-    logger.println("Configuration loaded from storage.");
+    logger.println("Configuration loaded from storage: " + (config != nullptr ? config->toString() : "null"));
     storage.end();
     return config;
 }

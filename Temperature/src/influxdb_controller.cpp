@@ -24,8 +24,6 @@ public:
     String payload = buildPayload(data, name);
 
     int code = http.POST(payload);
-        Serial.println(url);
-    Serial.println(payload);
     if (code > 0) {
       logger.printf("InfluxDB response: %d\n", code);
       http.end();
@@ -54,8 +52,6 @@ public:
     String payload = buildLogPayload(message, name);
 
     int code = http.POST(payload);
-    Serial.println(url);
-    Serial.println(payload);
     if (code > 0) {
       logger.printf("InfluxDB log response: %d\n", code);
       http.end();

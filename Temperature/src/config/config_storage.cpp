@@ -7,6 +7,7 @@ void ConfigStorage::begin() {
 void ConfigStorage::saveConfig(const ConfigData& cfg) {
     preferences.putString("name", cfg.name);
     preferences.putULong("sleepInSec", cfg.deepSleepTimeInSec);
+    preferences.putString("ip", cfg.ip.toString());
 }
 
 ConfigData* ConfigStorage::loadConfig() {
@@ -21,6 +22,13 @@ ConfigData* ConfigStorage::loadConfig() {
     ConfigData* cfg = new ConfigData();
     cfg->name = name;
     cfg->deepSleepTimeInSec =  preferences.getULong("sleepInSec", cfg->deepSleepTimeInSec);
+
+    String ipStr = preferences.getString("ip", "");
+    if (ipStr.length() > 0) {
+        cfg->ip.fromString(ipStr);
+    } else {
+        cfg->ip = IPAddress(0,0,0,0);
+    }
 
     return cfg;
 }
