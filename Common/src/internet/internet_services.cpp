@@ -55,7 +55,7 @@ public:
             http.end();
         }
 
-        delay(200);
+        delay(2000);
     }
 
     return nullptr;

@@ -15,7 +15,7 @@
 
 InfluxController influx("http://192.168.1.111:8086", "szlab", "esp32", influxToken);
 
-Esp32C3ZeroLed statusLed(10,40);
+Esp32C3ZeroLed statusLed(10,4);
 
 WifiController* wifi;
 ConfigData config;
@@ -43,21 +43,21 @@ void setup() {
 
   delay(200);
   statusLed.begin();
-  statusLed.setColor(Colors::Blue);  
-
+  statusLed.setColor(Colors::Magenta);
+ 
   esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
   bool forceLoad = (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED);
 
   if (forceLoad) {
-    statusLed.setColor(Colors::Magenta);  
     uint32_t delayMs = esp_random() % 5000;
     delay(12000 + delayMs);
   } else {
     delay(2000);
   }
 
+   statusLed.setColor(Colors::Red); 
   logger.begin(115200, 5000);
-  delay(1000);
+  statusLed.setColor(Colors::Blue); 
   logger.println("TEMPERATURE");
   logger.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
   logger.println("WiFi connecting...");
@@ -69,7 +69,6 @@ void setup() {
   wifi = new WifiController();
   if (!wifi->connect(cfg->ip)) {
       influx.sendLog("WiFi connection failed", config.name);
-      logger.println("WiFi connection failed");
       goToDeepSleep(&Colors::Red, 10);
   }
 
@@ -79,37 +78,35 @@ void setup() {
   } else {
     config = *cfg;
   }
+
+  if (config.name == "default-device") {
+    influx.sendLog("not able to load config for: " + wifi->getDeviceId(), "default-device");
+    goToDeepSleep(&Colors::Yellow, 60);
+  }
   logger.println("Config: " + config.toString());
-  delay(500); 
+  delay(50); 
 
-  // ConfigController configCtrl(wifi->getDeviceId(), String(CONFIG_ROOT));
-  // config = configCtrl.load();
-
+  statusLed.setColor(Colors::Lime);
+  
   // SENSOR
   if (!sensor.begin()) {
     influx.sendLog("BME280 init failed!", config.name);
-    logger.println("BME280 init failed!");
     goToDeepSleep(&Colors::Yellow, 10);
   }
   logger.println("BME280 ready");
-  
-  statusLed.setColor(Colors::Lime);  
 
-  logger.println("LOOP...");
   statusLed.setColor(Colors::Olive);
-  delay(500); 
-  statusLed.setColor(Colors::Green);
-  delay(500);
  
   // Read sensor
   BME280Data* data = sensor.read();
   if (data == nullptr) {
     statusLed.setColor(Colors::Blue);
     influx.sendLog("BME280 read failed", config.name);
-    logger.println("BME280 read failed");
     goToDeepSleep(&Colors::Yellow, 10);
   }
   logger.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n", data->temperature, data->humidity, data->pressure);
+
+  statusLed.setColor(Colors::Green);
 
   // Send to InfluxDB
   if(! influx.send(*data, config.name)) {
@@ -118,9 +115,9 @@ void setup() {
   }
 
   statusLed.setColor(Colors::Blue);
-  delay(500); 
+  delay(200); 
   statusLed.setColor(Colors::Green);
-  delay(500); 
+  delay(200); 
   statusLed.off();
   delay(100); 
 

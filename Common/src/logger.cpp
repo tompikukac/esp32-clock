@@ -10,7 +10,7 @@ void Logger::begin(uint32_t baud, uint32_t waitMs) {
   while (!Serial && millis() - start < waitMs) {
     delay(10);
   }
-
+  delay(10);
   _enabled = Serial;
 }
 

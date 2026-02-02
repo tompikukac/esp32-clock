@@ -42,6 +42,8 @@ public:
       return false;
     }
 
+    logger.println(message);
+
     HTTPClient http;
     String url = String(_host) + "/api/v2/write?org=" + _org + "&bucket=esp32logs&precision=s";
 
