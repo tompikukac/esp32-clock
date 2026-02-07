@@ -1,21 +1,17 @@
-#include <Wire.h>
-#include <Adafruit_SHT31.h>
-#include "temperature_sensor.cpp"
+#include "sht30_sensor.h"
 
-class SHT30Sensor : public TemperatureSensor {
-public:
-  bool begin() override {
-    Wire.begin(5, 6);  // SDA=GPIO5, SCL=GPIO6
-    return sht.begin(0x44);
-  }
+SHT30Sensor::SHT30Sensor(TwoWire& wire, uint8_t address)
+  : wire(wire), address(address) {}
 
-  TemperatureData read() override {
-    TemperatureData data;
-    data.temperature = sht.readTemperature();
-    data.humidity = sht.readHumidity();
-    return data;
-  }
+bool SHT30Sensor::beginImpl() {
+  wire.begin(5, 6);  // SDA=GPIO5, SCL=GPIO6
+  return sht.begin(address);
+}
 
-private:
-  Adafruit_SHT31 sht;
-};
+TemperatureData SHT30Sensor::readImpl() {
+  TemperatureData data;
+  data.temperature = sht.readTemperature();
+  data.humidity = sht.readHumidity();
+  data.valid = true;
+  return data;
+}

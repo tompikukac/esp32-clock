@@ -1,18 +1,11 @@
-#include "temperature_sensor.cpp"
-#include "sht30_sensor.cpp"
-#include "sht40_sensor.cpp"
+#include "sensor_factory.h"
 
-enum class SensorType {
-  SHT30,
-  SHT40
-};
-
-TemperatureSensor* createSensor(SensorType type) {
+TemperatureSensor* createSensor(SensorType type, TwoWire& wire) {
   switch (type) {
     case SensorType::SHT30:
-      return new SHT30Sensor();
+      return new SHT30Sensor(wire);
     case SensorType::SHT40:
-      return new SHT40Sensor();
+      return new SHT40Sensor(wire);
     default:
       return nullptr;
   }

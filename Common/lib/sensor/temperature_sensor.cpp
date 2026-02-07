@@ -1,13 +1,17 @@
-#pragma once
+#include "temperature_sensor.h"
 
-struct TemperatureData {
-  float temperature;
-  float humidity;
-};
+bool TemperatureSensor::begin() {
+  started = beginImpl();
+  return started;
+}
 
-class TemperatureSensor {
-public:
-  virtual ~TemperatureSensor() = default;
-  virtual bool begin() = 0;
-  virtual TemperatureData read() = 0;
-};
+bool TemperatureSensor::isStarted() const {
+  return started;
+}
+
+TemperatureData TemperatureSensor::read() {
+  if (!started) {
+    return {};
+  }
+  return readImpl();
+}

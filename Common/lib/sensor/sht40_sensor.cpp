@@ -1,22 +1,19 @@
-#include <Wire.h>
-#include <Adafruit_SHT4x.h>
-#include "temperature_sensor.cpp"
+#include "sht40_sensor.h"
 
-class SHT40Sensor : public TemperatureSensor {
-public:
-  bool begin() override {
-    return sht.begin();
-  }
+SHT40Sensor::SHT40Sensor(TwoWire& wire)
+  : wire(wire) {}
 
-  TemperatureData read() override {
-    TemperatureData data;
-    sensors_event_t temp, humidity;
-    sht.getEvent(&humidity, &temp);
-    data.temperature = temp.temperature;
-    data.humidity = humidity.relative_humidity;
-    return data;
-  }
+bool SHT40Sensor::beginImpl() {
+  return sht.begin(&wire);
+}
 
-private:
-  Adafruit_SHT4x sht;
-};
+TemperatureData SHT40Sensor::readImpl() {
+  TemperatureData data;
+  sensors_event_t temp, humidity;
+  sht.getEvent(&humidity, &temp);
+
+  data.temperature = temp.temperature;
+  data.humidity = humidity.relative_humidity;
+  data.valid = true;
+  return data;
+}

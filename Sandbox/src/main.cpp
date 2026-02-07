@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 #include "oled/oled_display.h"
-#include "sensor/temperature_sensor.cpp"
-#include "sensor/sensor_factory.cpp"
+#include "sensor/temperature_sensor.h"
+#include "sensor/sensor_factory.h"
 
 OledDisplay oled;
 // WifiControllerB* wifi;
@@ -21,7 +21,8 @@ OledDisplay oled;
 
 #define LED_PIN 8
 
-TemperatureSensor* sensor = createSensor(SensorType::SHT30);
+TemperatureSensor* sensor = createSensor(SensorType::SHT30, Wire);
+// TemperatureSensor* sensor = createSensor(SensorType::SHT40);
 
 
 void setup() {
@@ -50,15 +51,22 @@ void setup() {
 void loop() {
 
    if (sensor && sensor->begin()) {
+
+    if(sensor->isStarted()) {
+      Serial.println("Szenzor sikeres.");
+    } else {
+      Serial.println("Szenzor sikertelen.");
+    }
+    
     TemperatureData data = sensor->read();
     String tempStr = String(data.temperature, 2);
-    String humidityStr = String(data.humidity, 2) + "%";
+    String humidityStr = String(data.humidity, 0) + "%";
     Serial.println("TEMP:" + tempStr + " HUM:" + humidityStr);
     oled.setText(tempStr, 0, 30);
     oled.show();
     digitalWrite(LED_PIN, HIGH);
     delay(5000);
-    oled.setText(humidityStr, 0, 30);
+    oled.setText(humidityStr+"a", 0, 30);
     oled.show();
     digitalWrite(LED_PIN, LOW);
     // oled.setText(humidityStr, 0, 40);
