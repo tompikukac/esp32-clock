@@ -1,5 +1,5 @@
 #include "config_data.h"
-#include "sensor_type.h"
+#include "sensor/sensor_type.h"
 
 ConfigData::ConfigData()
     : name("default-device"), deepSleepTimeInSec(599), ip(0, 0, 0, 0), sensorType(SensorType::SHT30), oled(false) {}
@@ -25,7 +25,8 @@ bool ConfigData::parse(const String& jsonStr) {
     }
 
     if (doc.containsKey("sensorType")) {
-        sensorType = doc["sensorType"].as<const char*>();
+        const char* s = doc["sensorType"].as<const char*>();
+        sensorType = sensorTypeFromString(s);
     }
 
     if (doc.containsKey("Oled")) {
@@ -35,11 +36,18 @@ bool ConfigData::parse(const String& jsonStr) {
     return true;
 }
 
+SensorType ConfigData::sensorTypeFromString(const char* str) {
+    if (strcmp(str, "SHT30") == 0) return SensorType::SHT30;
+    if (strcmp(str, "SHT40") == 0) return SensorType::SHT40;
+    if (strcmp(str, "BME280") == 0) return SensorType::BME280;
+    return SensorType::Unknown;
+}
+
 String ConfigData::toString() const {
     return "name: " + name + 
     ", deepSleepTimeInSec: " + String(deepSleepTimeInSec) + 
     ", ip: " + ip.toString()+ 
-    ", sensorType: " + String(sensorType)+ 
+    ", sensorType: " + SensorTypeHelper::toString(sensorType)+ 
     ", Oled: " + String(oled ? "true" : "false");
 }
 

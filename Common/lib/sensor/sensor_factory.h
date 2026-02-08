@@ -4,10 +4,6 @@
 #include "sht30_sensor.h"
 #include "sht40_sensor.h"
 #include <Wire.h>
-
-enum class SensorType {
-  SHT30,
-  SHT40
-};
+#include "sensor/sensor_type.h"
 
 TemperatureSensor* createSensor(SensorType type, TwoWire& wire);

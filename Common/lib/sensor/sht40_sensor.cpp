@@ -14,6 +14,5 @@ TemperatureData SHT40Sensor::readImpl() {
 
   data.temperature = temp.temperature;
   data.humidity = humidity.relative_humidity;
-  data.valid = true;
   return data;
 }

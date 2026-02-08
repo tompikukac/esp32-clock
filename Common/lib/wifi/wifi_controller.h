@@ -5,7 +5,7 @@
 class WifiController {
 public:
     WifiController();
-    bool connect(const IPAddress& ip = IPAddress(0,0,0,0));
+    bool connect(const IPAddress* ip =nullptr);
     void disconnect();
     bool isConnected() const;
     String getDeviceId();

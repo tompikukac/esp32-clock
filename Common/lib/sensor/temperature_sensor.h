@@ -1,10 +1,14 @@
 #pragma once
 #include <Arduino.h>
+#include <cmath>
 
 struct TemperatureData {
   float temperature;
   float humidity;
-  bool valid;
+  float pressure;
+  bool isValid() const {
+    return !isnan(temperature) || !isnan(humidity) || !isnan(pressure);
+  }
 };
 
 class TemperatureSensor {

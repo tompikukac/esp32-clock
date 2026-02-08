@@ -1,6 +1,6 @@
 {
   "name": "default-device",
   "deepSleepTimeInSec": 600,
-  "sensorType": "BME280",
+  "sensorType": "SHT30",
   "Oled": false
 }

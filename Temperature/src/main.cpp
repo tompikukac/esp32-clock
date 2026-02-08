@@ -10,6 +10,10 @@
 #include "influxdb_controller.cpp"
 #include "logger.h"
 #include <esp_task_wdt.h>
+#include "oled/oled_display.h"
+#include "sensor/temperature_sensor.h"
+#include "sensor/sensor_factory.h"
+#include <WiFi.h>
 
 #define CONFIG_ROOT "https://raw.githubusercontent.com/tompikukac/esp32-projects/main/Temperature/config/devices/"
 
@@ -20,7 +24,9 @@ Esp32C3ZeroLed statusLed(10,4);
 WifiController* wifi;
 ConfigData config;
 DeepSleep deepSleep;
-BME280Sensor sensor(4, 5);
+// BME280Sensor sensor(4, 5);
+
+OledDisplay oled;
 
 void goToDeepSleep(const LedColor* color, uint32_t sleepSeconds) {
   if (color == nullptr) {
@@ -55,19 +61,35 @@ void setup() {
     delay(2000);
   }
 
-   statusLed.setColor(Colors::Red); 
+  statusLed.setColor(Colors::Red); 
   logger.begin(115200, 5000);
   statusLed.setColor(Colors::Blue); 
   logger.println("TEMPERATURE");
-  logger.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
-  logger.println("WiFi connecting...");
 
+  // Serial.begin(115200);
+  //         IPAddress local_IP(192,168,1,77); // from parameter
+  //       IPAddress gateway(192,168,1,1);  // set your gateway
+  //       IPAddress subnet(255,255,255,0); // set your subnet mask
+
+  //       WiFi.config(local_IP, gateway, subnet);
+  // WiFi.begin("VaultTec", "polpolpol");
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.print(".");
+  // }
+  // Serial.println("Connected");
+
+
+  logger.printf("Wakeup cause: %d, forceLoad: %d\n", cause, forceLoad);
+  
+  logger.println("Getting configs...");
   ConfigController configCtrl(wifi->getDeviceId(), String(CONFIG_ROOT));
   ConfigData* cfg = configCtrl.load();
-
+  
   // WIFI
+  logger.println("WiFi connecting...");
   wifi = new WifiController();
-  if (!wifi->connect(cfg->ip)) {
+  if (!wifi->connect(cfg ? &cfg->ip : nullptr)) {
       influx.sendLog("WiFi connection failed", config.name);
       goToDeepSleep(&Colors::Red, 10);
   }
@@ -87,29 +109,47 @@ void setup() {
   delay(50); 
 
   statusLed.setColor(Colors::Lime);
+
+  if (cfg->oled)
+  {
+    oled.begin();
+    oled.setFont(u8g2_font_timB18_tn);
+  }
+
+  TemperatureSensor* sensor = createSensor(cfg->sensorType, Wire);
   
   // SENSOR
-  if (!sensor.begin()) {
-    influx.sendLog("BME280 init failed!", config.name);
+  if (!sensor || !sensor->begin()) {
+  // if (!sensor.begin()) {
+    influx.sendLog("sensor init failed!", config.name);
     goToDeepSleep(&Colors::Yellow, 10);
   }
-  logger.println("BME280 ready");
+  logger.println("Sensor ready");
 
   statusLed.setColor(Colors::Olive);
  
   // Read sensor
-  BME280Data* data = sensor.read();
-  if (data == nullptr) {
+  TemperatureData data = sensor->read();
+
+  if (!data.isValid()) {
     statusLed.setColor(Colors::Blue);
     influx.sendLog("BME280 read failed", config.name);
     goToDeepSleep(&Colors::Yellow, 10);
   }
-  logger.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n", data->temperature, data->humidity, data->pressure);
+  logger.printf("T: %.2f C, H: %.2f %%, P: %.2f hPa\n", data.temperature, data.humidity, data.pressure);
 
   statusLed.setColor(Colors::Green);
 
+
+  if (cfg->oled)
+  {
+    String tempStr = String(data.temperature, 2);
+    oled.setText(tempStr, 0, 30);
+    oled.show();
+  }
+
   // Send to InfluxDB
-  if(! influx.send(*data, config.name)) {
+  if(! influx.send(data, config.name)) {
     logger.println("InfluxDB send failed");
     goToDeepSleep(&Colors::Red, 10);
   }

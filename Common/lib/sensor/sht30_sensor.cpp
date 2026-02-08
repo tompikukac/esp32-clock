@@ -12,6 +12,5 @@ TemperatureData SHT30Sensor::readImpl() {
   TemperatureData data;
   data.temperature = sht.readTemperature();
   data.humidity = sht.readHumidity();
-  data.valid = true;
   return data;
 }
